@@ -1,0 +1,2 @@
+Công việc :
+Khi thay đổi bên phần header thì render lại Trang đó
