@@ -1,9 +1,21 @@
-import { Divider, Rate, Space, Table, Typography } from "antd";
-import React, { useCallback, useEffect, useState } from "react";
+import { Divider, Rate, Result, Space, Button, Typography } from "antd";
+import React, { useState } from "react";
 import Avatar from "antd/es/avatar/avatar";
-import ProductService from "../service";
+import {
+  CheckCircleFilled,
+  CloseCircleFilled,
+  WarningFilled,
+} from "@ant-design/icons";
 import AppTable from "../component/AppTable";
+import ModelAdd from "../component/ModelAdd";
+import Service from "../service";
 function Inventory() {
+  const [openModel, setOpenModel] = useState(false);
+  const onSave = async (values) => {
+    const service = new Service("");
+    await service.create(values);
+    setOpenModel(false);
+  };
   const columns = [
     {
       title: "Xem trước",
@@ -16,7 +28,6 @@ function Inventory() {
       editable: true,
       filterSearch: true,
       onFilter: (value, record) => {
-        console.log(value);
         record.title.includes(value);
       },
     },
@@ -29,7 +40,24 @@ function Inventory() {
     {
       title: "Còn",
       dataIndex: "stock",
-      render: (value) => <span>{value} (sản phẩm)</span>,
+      render: (value) => (
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-around",
+          }}
+        >
+          {value}
+          {value > 40 ? (
+            <CheckCircleFilled className="text-success" />
+          ) : value > 10 ? (
+            <WarningFilled className="text-warning" />
+          ) : (
+            <CloseCircleFilled className="text-danger" />
+          )}
+        </span>
+      ),
       editable: true,
     },
     {
@@ -50,10 +78,27 @@ function Inventory() {
   ];
   return (
     <Space direction="vertical">
-      <Typography.Title level={3} className="text-center">
-        <Divider>Inventory</Divider>
-      </Typography.Title>
-      <AppTable col={columns}></AppTable>
+      <Divider>
+        <Typography.Title level={3} className="text-center">
+          Sản phẩm
+        </Typography.Title>
+      </Divider>
+      <Button
+        type="primary "
+        onClick={() => {
+          setOpenModel(true);
+        }}
+      >
+        Thêm sản phẩm
+      </Button>
+      <ModelAdd
+        openModel={openModel}
+        onSave={onSave}
+        onCancel={() => {
+          setOpenModel(false);
+        }}
+      />
+      <AppTable col={columns} addItem={openModel}></AppTable>
     </Space>
   );
 }

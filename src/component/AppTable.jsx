@@ -1,15 +1,16 @@
-import { Form, InputNumber, Input, Table, Typography } from "antd";
+import { Form, InputNumber, Input, Table } from "antd";
 import { useState, useCallback, useEffect } from "react";
 import {
+  CloseCircleOutlined,
   EditOutlined,
   RollbackOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
 import Service from "../service";
-const AppTable = ({ col }) => {
+import ButtonGroup from "antd/es/button/button-group";
+const AppTable = ({ col, addItem }) => {
   const [loading, setLoading] = useState(false);
   const [dataSource, setDataSource] = useState([]);
-  const [fitSizeInput, setFitSizeInput] = useState(false);
   const [form] = Form.useForm();
   const [editingKey, setEditingKey] = useState("");
   const API = useCallback(async () => {
@@ -20,13 +21,20 @@ const AppTable = ({ col }) => {
   useEffect(() => {
     setLoading(true);
     API().catch(console.error());
-  }, [API]);
+  }, [addItem, API]);
   const isEditing = (record) => record._id === editingKey;
   const edit = (record) => {
     form.setFieldsValue({
       ...record,
     });
     setEditingKey(record._id);
+  };
+  const deleted = async (record) => {
+    if (window.confirm()) {
+      setLoading(true);
+      await new Service("").delete(record._id);
+      API();
+    }
   };
   const cancel = () => {
     setEditingKey("");
@@ -44,9 +52,8 @@ const AppTable = ({ col }) => {
           ...item,
           ...row,
         });
-
         console.log(
-          await service.updata(key, {
+          await service.update(key, {
             ...item,
             ...row,
           })
@@ -82,20 +89,28 @@ const AppTable = ({ col }) => {
             <RollbackOutlined className="text-muted" onClick={cancel} />
           </span>
         ) : (
-          <EditOutlined
-            className="text-warning"
-            disabled={editingKey !== ""}
-            onClick={() => edit(record)}
-          />
+          <ButtonGroup
+            style={{
+              display: "flex",
+              justifyContent: "space-evenly",
+            }}
+          >
+            <EditOutlined
+              className="text-warning"
+              disabled={editingKey !== ""}
+              onClick={() => edit(record)}
+            />
+            <CloseCircleOutlined
+              className="text-danger"
+              onClick={() => deleted(record)}
+            />
+          </ButtonGroup>
         );
       },
     },
   ];
   const mergedColumns = columns.map((col) => {
     if (!col.editable) {
-      if (!col.editable) {
-        col.visible = true;
-      }
       return col;
     }
     return {
@@ -113,64 +128,66 @@ const AppTable = ({ col }) => {
     };
   });
   return (
-    <Form form={form} component={false}>
-      <Table
-        rowKey={(record) => record._id}
-        loading={loading}
-        components={{
-          body: {
-            cell: ({
-              editing,
-              dataIndex,
-              title,
-              inputType,
-              record,
-              index,
-              children,
-              ...restProps
-            }) => {
-              const inputNode =
-                inputType === "number" ? (
-                  <InputNumber />
-                ) : (
-                  <Input.TextArea autoSize={true} />
-                );
-              return (
-                <td {...restProps}>
-                  {editing ? (
-                    <Form.Item
-                      name={dataIndex}
-                      style={{
-                        margin: 0,
-                      }}
-                      rules={[
-                        {
-                          required: true,
-                          message: `Please Input ${title}!`,
-                        },
-                      ]}
-                    >
-                      {inputNode}
-                    </Form.Item>
+    <div>
+      <Form form={form} component={false}>
+        <Table
+          rowKey={(record) => record._id}
+          loading={loading}
+          components={{
+            body: {
+              cell: ({
+                editing,
+                dataIndex,
+                title,
+                inputType,
+                record,
+                index,
+                children,
+                ...restProps
+              }) => {
+                const inputNode =
+                  inputType === "number" ? (
+                    <InputNumber className="inputAnt" />
                   ) : (
-                    children
-                  )}
-                </td>
-              );
+                    <Input.TextArea autoSize={true} />
+                  );
+                return (
+                  <td {...restProps}>
+                    {editing ? (
+                      <Form.Item
+                        name={dataIndex}
+                        style={{
+                          margin: 0,
+                        }}
+                        rules={[
+                          {
+                            required: true,
+                            message: `Please Input ${title}!`,
+                          },
+                        ]}
+                      >
+                        {inputNode}
+                      </Form.Item>
+                    ) : (
+                      children
+                    )}
+                  </td>
+                );
+              },
             },
-          },
-        }}
-        bordered
-        dataSource={dataSource}
-        columns={mergedColumns}
-        rowClassName="editable-row"
-        pagination={
-          dataSource.length < 5
-            ? false
-            : { position: ["bottomLeft"], pageSize: 5 }
-        }
-      />
-    </Form>
+          }}
+          bordered
+          dataSource={dataSource}
+          columns={mergedColumns}
+          rowClassName="editable-row"
+          pagination={
+            dataSource.length < 5
+              ? false
+              : { position: ["bottomLeft"], pageSize: 5 }
+          }
+        />
+      </Form>
+    </div>
   );
 };
 export default AppTable;

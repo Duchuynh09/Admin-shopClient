@@ -4,7 +4,7 @@ import {} from "../service";
 
 export function RecentOrders({ dataSource }) {
   return (
-    <Table
+    <Table size="small"
       rowKey={(record) => record._id}
       pagination={
         dataSource.length < 5

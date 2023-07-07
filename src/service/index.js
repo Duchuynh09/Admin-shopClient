@@ -13,5 +13,6 @@ export default class Service {
   async getOne(id) {
     return (await this.api.get(`/${id}`)).data;
   }
-  update = async (id) => await this.api.patch(`/${id}`);
+  update = async (id,data) => await this.api.patch(`/${id}`,data);
+  delete = async (id)=>await this.api.delete(`/${id}`)
 }

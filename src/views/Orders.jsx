@@ -1,7 +1,15 @@
-import React from "react";
 import AppTabs from "../component/AppTabs";
-import { Typography, Avatar } from "antd";
+import { Typography, Avatar, Divider } from "antd";
+import { FolderAddOutlined } from "@ant-design/icons";
+import { actions, useStore } from "../store";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import Service from "../service";
+
 function Orders() {
+  const [state, dispatch] = useStore();
+  const { orders } = state;
+  const [dataSource, setDataSource] = useState([]);
+  const [loading, setLoading] = useState(false);
   const columns = [
     {
       title: "Xem trước",
@@ -45,16 +53,27 @@ function Orders() {
       dataIndex: "total",
       render: (val) => <span>${val}</span>,
     },
-    {title:"Action",dataIndex:"operation",render:(_,record)=>{
-      return <a href="">Xác nhận đơn hàng</a>
-    }}
   ];
+  useEffect(() => {
+    async function getApi() {
+      setLoading(true);
+      const service = new Service("cart");
+      const data = await service.getAll();
+      setDataSource(data);
+      dispatch(actions.setOrders(data));
+    }
+    getApi();
+    setLoading(false);
+  }, [dispatch, orders]);
+
   return (
     <div direction="vertical">
-      <Typography.Title level={3} className="text-center">
-        Sản Phẩm order
-      </Typography.Title>
-      <AppTabs routeAPI="cart" columns={columns} />
+      <Divider>
+        <Typography.Title level={3} className="text-center">
+          Sản Phẩm order
+        </Typography.Title>
+      </Divider>
+      <AppTabs dataSource={dataSource} columns={columns} loading={loading} />
     </div>
   );
 }

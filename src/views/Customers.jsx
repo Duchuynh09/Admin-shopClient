@@ -1,4 +1,4 @@
-import {  Table, Typography } from "antd";
+import { Divider, Table, Typography } from "antd";
 import React, { useState, useEffect, useCallback } from "react";
 import Service from "../service";
 function Customers() {
@@ -6,7 +6,7 @@ function Customers() {
   const [dataSource, setDataSource] = useState([]);
   const API = useCallback(async () => {
     const userService = new Service("users");
-    const users = (await userService.getAll());
+    const users = await userService.getAll();
     setDataSource(users);
     setLoading(false);
   }, []);
@@ -16,7 +16,9 @@ function Customers() {
   }, [API]);
   return (
     <div className="text-center">
-      <Typography.Title level={3}>Customers</Typography.Title>
+      <Divider>
+        <Typography.Title level={3}>Khách hàng</Typography.Title>
+      </Divider>
       <Table
         pagination={
           dataSource.length < 5
@@ -28,7 +30,8 @@ function Customers() {
           { title: "Tên", dataIndex: "lastName" },
           {
             title: "Tuổi",
-            dataIndex: "age",widthshouldCellUpdate:false,
+            dataIndex: "age",
+            widthshouldCellUpdate: false,
             defaultSortOrder: "descend",
             sorter: (a, b) => a.age - b.age,
           },

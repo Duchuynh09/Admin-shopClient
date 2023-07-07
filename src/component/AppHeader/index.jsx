@@ -13,41 +13,29 @@ import {
   UserOutlined,
   RightOutlined,
   MailOutlined,
-  EditOutlined,
+  CheckOutlined,
 } from "@ant-design/icons";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { actions, useStore } from "../../store";
 import Service from "../../service";
 function AppHeader() {
   const [state, dispatch] = useStore();
-  const [orders, setOrders] = useState([...state.orders]);
+  const [carts, setCarts] = useState([]);
   const [comments, setComments] = useState([]);
   const [notificationOpen, setnotificationOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
-  const API = useCallback(async () => {
-    setOrders(await new Service("cart").getAll());
-  }, []);
   useEffect(() => {
-    API();
-  }, [API]);
+    setCarts(state.orders);
+  }, [state.orders]);
   const countOrder = () => {
-    var count = orders
+    var count = carts
       .map((pro) => (!pro.order ? 1 : 0))
       .reduce((acc, next) => acc + next, 0);
     return count;
   };
-  const exceptOrder = async (id,item) => {
-    // await new Service("cart").update(id);
-    dispatch(actions.setOrders(item));
-    setOrders(await new Service("cart").getAll());
-  };
-  const renderItem = (dataSource) => {
-    return (
-      <List.Item
-        key={dataSource.userId._id}
-        // style={{ backgroundColor: "rgba(0, 0, 0, 0.05)" }}
-      ></List.Item>
-    );
+  const exceptOrder = async (id) => {
+    await new Service("cart").update(id);
+    dispatch(actions.exceptOrder(state.orders));
   };
   return (
     <div className="AppHeader">
@@ -81,14 +69,14 @@ function AppHeader() {
         closeIcon={<RightOutlined />}
       >
         <List
-          dataSource={orders}
+          dataSource={carts}
           renderItem={(item) => {
             return !item.order ? (
               <List.Item key={item._id}>
                 <Card
                   actions={[
-                    <EditOutlined
-                      onClick={() => exceptOrder(item._id,item)}
+                    <CheckOutlined 
+                      onClick={() => exceptOrder(item._id)}
                       className="btn btn-success text-white"
                     />,
                   ]}

@@ -36,7 +36,7 @@ function DashBoardChart({ carts }) {
       labels,
       datasets: [
         {
-          label: "Hàng còn lại",
+          label: "Tổng tiền mua hàng",
           data: data1,
           backgroundColor: "rgba(255,0,0,1)",
         },

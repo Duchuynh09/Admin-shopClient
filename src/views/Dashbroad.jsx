@@ -1,4 +1,4 @@
-import { Space, Typography } from "antd";
+import { Space, Typography, Divider } from "antd";
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   ShoppingCartOutlined,
@@ -13,13 +13,12 @@ import { DashBroadCard } from "../component/Dashboard/DashBroadCard.jsx";
 import { useStore } from "../store/hooks.js";
 
 function DashBroad() {
-  const [state,dispatch] = useStore()
+  // const [state,dispatch] = useStore()
   const [orders, setOrders] = useState(0);
   const [inventory, setInventory] = useState(0);
   const [customers, setCustomers] = useState(0);
   const [reveneu, setReveneu] = useState(0);
   const [dataSource, setDataSource] = useState([]);
-
   const carts = useRef([]);
   const getStock = (products) => {
     const totalStock = products
@@ -28,18 +27,24 @@ function DashBroad() {
     return totalStock;
   };
   const getOrder = () => {
-    return carts.current
-      .map((cart) => {
-        return cart.products
-          .map((pro) => pro.quantity)
-          .reduce((acc, next) => acc + next);
-      })
-      .reduce((acc, next) => acc + next);
+    return carts.current.length > 0
+      ? carts.current
+          .map((cart) => {
+            return cart.delivered
+              ? cart.products
+                  .map((pro) => pro.quantity)
+                  .reduce((acc, next) => acc + next)
+              : 0;
+          })
+          .reduce((acc, next) => acc + next)
+      : 0;
   };
   const getRevenu = () => {
-    return carts.current
-      .map((cart) => cart.total)
-      .reduce((acc, next) => acc + next);
+    return carts.current.length > 0
+      ? carts.current
+          .map((cart) => cart.total)
+          .reduce((acc, next) => acc + next)
+      : 0;
   };
   const API = useCallback(async () => {
     const productService = new Service("");
@@ -55,7 +60,6 @@ function DashBroad() {
     setReveneu(getRevenu());
     setInventory(getStock(productsAPIData));
     setCustomers((await userService.getAll()).length);
-    
   }, []);
 
   useEffect(() => {
@@ -118,9 +122,11 @@ function DashBroad() {
   ];
   return (
     <div>
-      <Typography.Title level={3} className="text-center">
-        DashBroad
-      </Typography.Title>
+      <Divider>
+        <Typography.Title level={3} className="text-center">
+          Dashboard
+        </Typography.Title>
+      </Divider>
       <div className="d-flex">
         {itemCards.map((item, index) => (
           <DashBroadCard {...item} keyData={index} key={index} />

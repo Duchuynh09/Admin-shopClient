@@ -1,4 +1,5 @@
 import {
+  CarOutlined,
   AppstoreOutlined,
   ShopOutlined,
   ShoppingCartOutlined,
@@ -18,7 +19,8 @@ function SideMenu() {
   const navigate = useNavigate();
   return (
     <div className="SideMenu col-2">
-      <Menu className="SideMenuVertical"
+      <Menu
+        className="SideMenuVertical"
         onClick={(item) => {
           navigate(item.key);
         }}
@@ -38,6 +40,11 @@ function SideMenu() {
             label: "Orders",
             key: "/Orders",
             icon: <ShoppingCartOutlined />,
+          },
+          {
+            label: "Delivery",
+            key: "/Delivery",
+            icon: <CarOutlined />,
           },
           {
             label: "Customers",
